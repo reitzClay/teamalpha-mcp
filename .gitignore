@@ -18,6 +18,9 @@ venv/
 dist/
 *.egg-info/
 
+# Docker compose (use docker-compose.yml only)
+compose.yaml
+
 # Editor files
 .vscode/
 .idea/
