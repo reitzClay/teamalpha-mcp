@@ -1,0 +1,30 @@
+services:
+  # The LLM Power Plant. This is the only service our agent depends on.
+  ollama:
+    image: ollama/ollama
+    # This ensures GPU access for performance.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama # Persist downloaded models
+
+  # The Agent Container: A lean container for our CrewAI logic.
+  # We will NOT be running this with 'docker compose up'.
+  # We are only defining it here so we can build it easily.
+  teamalpha-agent:
+    build: .
+    environment:
+      - OPENAI_API_KEY=sk-dummy-key-for-local-ollama
+      - OLLAMA_HOST=http://ollama:11434
+    # Note: No ports, no dependencies, no environment variables here.
+    # It's just a build definition.
+
+volumes:
+  ollama_data:

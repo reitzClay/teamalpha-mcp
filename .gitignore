@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual environments
+venv/
+.env
+.env.*
+
+# Byte-compiled / optimized / DLL files
+*.so
+
+# Distribution / packaging
+.build/
+dist/
+*.egg-info/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+
+# Docker and logs
+agent_output.log
+agent_output.txt
+
+# Python dependency lock
+uv.lock

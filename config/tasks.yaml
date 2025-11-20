@@ -1,0 +1,7 @@
+- description: >
+    Using the available tools, find out what the primary repository is for the
+    'crewai' project on GitHub. Then, get the contents of the 'README.md' file
+    from that repository's main branch.
+  expected_output: >
+    The full text content of the README.md file from the main crewai repository.
+  agent: researcher

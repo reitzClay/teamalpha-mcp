@@ -1,0 +1,19 @@
+[project]
+name = "teamalpha"
+version = "0.1.0"
+description = "AI Agentic Fleet"
+authors = [
+    {name = "Clay", email = "yerimo2450@fermiro.com"},
+]
+requires-python = ">=3.10"
+dependencies = [
+    "langchain>=0.1.0",
+    "langchain-core>=0.1.0",
+    "langchain-ollama>=0.1.0",
+    "requests"
+]
+
+[tool.uv]
+dev-dependencies = [
+    "ipython",
+]
