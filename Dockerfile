@@ -13,8 +13,8 @@ COPY . .
 # Configure uv to use the container's main python environment
 ENV UV_PROJECT_ENVIRONMENT="/usr/local/"
 
-# Install dependencies from uv.lock, skipping development packages.
-RUN uv sync --locked --no-dev
+# Install dependencies from uv.lock if present; fall back to `uv sync --no-dev` when lock mismatch
+RUN if [ -f uv.lock ]; then uv sync --locked --no-dev || uv sync --no-dev; else uv sync --no-dev; fi
 
-# Set the default command to run the crew
-CMD ["python", "crew.py"]
+# Run the FastAPI app with uvicorn on container start
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
