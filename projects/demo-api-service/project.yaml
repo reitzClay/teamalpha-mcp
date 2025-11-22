@@ -1,0 +1,18 @@
+name: demo-api-service
+version: 0.1.0
+description: "A new project created with TeamAlpha"
+
+tags:
+  - greenfield
+  - template
+
+author:
+  name: "Your Name"
+  email: "your.email@example.com"
+
+goals:
+  - "Define project scope"
+  - "Design architecture"
+  - "Implement features"
+  - "Review code quality"
+  - "Test thoroughly"

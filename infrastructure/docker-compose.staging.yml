@@ -1,0 +1,27 @@
+version: '3.8'
+
+# Staging compose is a scaffold; adjust ports and env to match your staging host.
+services:
+  ollama-staging:
+    image: ollama/ollama
+    container_name: staging_ollama
+    ports:
+      - "11436:11434"
+    volumes:
+      - ollama_staging_data:/root/.ollama
+
+  teamalpha-agent-staging:
+    build: .
+    container_name: staging_teamalpha_agent
+    environment:
+      - OLLAMA_HOST=http://ollama-staging:11434
+    depends_on:
+      - ollama-staging
+    ports:
+      - "19090:8080"
+    volumes:
+      - /home/clay/Projects/TheAgame:/data/TheAgame-staging:ro
+    command: ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
+
+volumes:
+  ollama_staging_data: {}

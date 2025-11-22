@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  ollama-dev:
+    image: ollama/ollama
+    container_name: dev_ollama
+    # Map to a different host port to avoid colliding with any prod Ollama
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama_dev_data:/root/.ollama
+
+  teamalpha-agent-dev:
+    build: .
+    container_name: dev_teamalpha_agent
+    environment:
+      - OLLAMA_HOST=http://ollama-dev:11434
+    depends_on:
+      - ollama-dev
+    # Expose the internal app port on a dev-only host port
+    ports:
+      - "18080:8080"
+    volumes:
+      - /home/clay/Development/TheAgame:/data/TheAgame-dev:ro
+    command: ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
+
+volumes:
+  ollama_dev_data: {}

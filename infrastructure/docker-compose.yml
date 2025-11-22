@@ -17,7 +17,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /home/clay/Development/TheAgame:/data/TheAgame:ro
+      - /home/clay/Development/TheAgame:/data/TheAgame-dev:ro
+      - /home/clay/Projects/TheAgame:/data/TheAgame-prod:ro
     command: ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
 
 volumes:
