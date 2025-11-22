@@ -11,7 +11,9 @@ services:
       - ollama_dev_data:/root/.ollama
 
   teamalpha-agent-dev:
-    build: .
+    build:
+      context: ..
+      dockerfile: Dockerfile
     container_name: dev_teamalpha_agent
     environment:
       - OLLAMA_HOST=http://ollama-dev:11434

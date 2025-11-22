@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 """Base agent class and role definitions for the software team."""
 
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import dataclass, field
 from enum import Enum
-from langchain_ollama import OllamaLLM
 import json
+import os
+
+# Try to import LangChain Ollama, fall back gracefully
+try:
+    from langchain_ollama import OllamaLLM
+    OLLAMA_AVAILABLE = True
+except ImportError:
+    OLLAMA_AVAILABLE = False
+    OllamaLLM = None
 
 
 class AgentRole(Enum):
@@ -64,6 +72,8 @@ class Agent:
         role: AgentRole,
         llm_model: str = "llama3",
         ollama_host: str = "http://ollama:11434",
+        lmstudio_host: str = "http://localhost:1234",
+        provider: str = "auto",  # "auto", "ollama", "lmstudio"
     ):
         """
         Initialize an agent.
@@ -73,13 +83,73 @@ class Agent:
             role: Agent role (engineer, reviewer, etc.)
             llm_model: LLM model name
             ollama_host: Ollama server URL
+            lmstudio_host: LM Studio server URL
+            provider: LLM provider ("auto" auto-detects, "ollama", "lmstudio")
         """
         self.name = name
         self.role = role
-        self.llm = OllamaLLM(model=llm_model, base_url=ollama_host)
+        self.llm = self._init_llm(
+            llm_model, ollama_host, lmstudio_host, provider
+        )
         self.tools: Dict[str, Tool] = {}
         self.memory: List[Message] = []
         self.context = ""
+        self.provider = provider
+
+    def _init_llm(
+        self,
+        model: str,
+        ollama_host: str,
+        lmstudio_host: str,
+        provider: str,
+    ):
+        """Initialize LLM with provider auto-detection."""
+        
+        # Check environment for provider override
+        env_provider = os.getenv("LLM_PROVIDER", provider)
+        env_lmstudio_host = os.getenv("LMSTUDIO_HOST", lmstudio_host)
+        
+        if env_provider == "lmstudio":
+            # Use LM Studio
+            from .lmstudio import LMStudioClient
+            return LMStudioClient(base_url=env_lmstudio_host)
+        
+        elif env_provider == "ollama":
+            # Use Ollama
+            if not OLLAMA_AVAILABLE:
+                raise ImportError("OllamaLLM not available. Install: pip install langchain-ollama")
+            return OllamaLLM(model=model, base_url=ollama_host)
+        
+        elif env_provider == "auto":
+            # Try LM Studio first, then Ollama
+            try:
+                from .lmstudio import LMStudioClient
+                client = LMStudioClient(base_url=env_lmstudio_host)
+                # Test connection
+                try:
+                    health = client.health()
+                    if health.get("status") != "offline":
+                        print(f"✅ Using LM Studio at {env_lmstudio_host}")
+                        return client
+                except:
+                    pass
+            except:
+                pass
+            
+            # Fall back to Ollama
+            if OLLAMA_AVAILABLE:
+                print(f"✅ Using Ollama at {ollama_host}")
+                return OllamaLLM(model=model, base_url=ollama_host)
+            
+            raise RuntimeError(
+                "No LLM provider available.\n"
+                "Install: pip install langchain-ollama\n"
+                "Or set LLM_PROVIDER=lmstudio and ensure LM Studio is running"
+            )
+        
+        else:
+            raise ValueError(f"Unknown provider: {env_provider}")
+
 
     def add_tool(self, tool: Tool):
         """Register a tool."""
@@ -132,7 +202,16 @@ Recent team memory:
             LLM response
         """
         prompt = f"{self.build_system_prompt()}\n\nTask: {task}"
-        return self.llm.invoke(prompt)
+        
+        # Handle both LangChain LLM and custom LM Studio client
+        if hasattr(self.llm, 'invoke'):
+            # LangChain interface (Ollama)
+            return self.llm.invoke(prompt)
+        elif hasattr(self.llm, 'generate'):
+            # Custom LM Studio client
+            return self.llm.generate(prompt)
+        else:
+            raise RuntimeError(f"Unknown LLM interface: {type(self.llm)}")
 
     def parse_tool_calls(self, response: str) -> List[Dict[str, Any]]:
         """
