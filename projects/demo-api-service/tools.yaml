@@ -1,0 +1,23 @@
+tools:
+  - name: read_file
+    description: "Read contents of a file"
+    module: built_in
+    function: read_file
+  
+  - name: write_file
+    description: "Write contents to a file"
+    module: built_in
+    function: write_file
+  
+  - name: code_analyzer
+    description: "Analyze code quality and structure"
+    module: built_in
+    function: analyze_code
+  
+  - name: document_generator
+    description: "Generate documentation from code"
+    module: built_in
+    function: generate_docs
+
+# Add custom tools here
+custom_tools: []
