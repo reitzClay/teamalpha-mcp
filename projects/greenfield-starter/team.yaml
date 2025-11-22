@@ -1,0 +1,23 @@
+agents:
+  - name: Alice
+    role: engineer
+    description: "Backend engineer focused on implementation"
+  
+  - name: Bob
+    role: code_reviewer
+    description: "Code quality and testing expert"
+  
+  - name: Eve
+    role: architect
+    description: "System design and architecture specialist"
+  
+  - name: Charlie
+    role: qa_engineer
+    description: "Quality assurance and testing"
+  
+  - name: Diana
+    role: product_manager
+    description: "Product vision and requirements"
+
+team_name: "Development Team"
+team_description: "Cross-functional software development team"
